@@ -21,6 +21,7 @@ class Computer
       @scan_finished = event["timestamp"] if scan_finished.nil? || event["timestamp"] > scan_finished
       detection_from_scan = true
     when Events::EVENT_TYPES[:scan_failed]
+      continue if @scan_failed
       @scan_finished = event["timestamp"] if scan_finished.nil? || event["timestamp"] > scan_finished
       @scan_failed = event["timestamp"]
     when Events::EVENT_TYPES[:threat_detected]
