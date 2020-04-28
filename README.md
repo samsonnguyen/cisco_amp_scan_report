@@ -42,4 +42,4 @@ Csv file with the following columns:
 | scan_finished | Completion time of the scan |
 | scan_failed | Time reported of a scan failure |
 | detection_from_scan | If the agent reported that the scan caused a detection |
-| detections | These are detections within the dataset where timestamp > start_time passed into the script. **THESE MAY NOT CORRESPOND TO A DETECTION FROM A SCAN** |
+| detections | These are detections within the dataset where timestamp > start_time (and group) passed into the script. **THESE MAY NOT CORRESPOND TO A DETECTION FROM A SCAN** |
