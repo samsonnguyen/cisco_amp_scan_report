@@ -47,6 +47,7 @@ class Events
     uri.query = URI.encode_www_form(params)
     
     res = make_request(uri)
+    raise "The API returned a non 200 reponse #{res.body}" if res.code != 200
     JSON.parse(res.body)
   end
 
