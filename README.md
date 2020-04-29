@@ -22,7 +22,7 @@ Parameters:
 | parameter | description |
 | --- | --- |
 | --groups | A comma seperated list of group names (e.g "Audit, Protect") |
-| --start_time | ISO formatted time such as 2020-04-28 04:22 |
+| --start_time | ISO formatted time such as 2020-04-28 04:22 - This should be the window when scans were started to get accurate results |
 | --group_mapping_file [optional] | path to json output from v1/groups api endpoint for faster processing |
 | --host_mapping_file [optional] | path to json output from v1/computers api endpoint for faster processing |
 | --api_key | api key |
