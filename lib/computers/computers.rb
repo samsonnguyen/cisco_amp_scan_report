@@ -1,15 +1,34 @@
 require 'json'
 require_relative '../events/events'
 require_relative './computer'
+require_relative '../api_client'
+require_relative '../simple_file_cache'
+
 class Computers
   include Enumerable
+  include ApiClient
+  include SimpleFileCache
   attr_accessor :mapping, :computers
 
-  def initialize(group_mapping_file)
+  def initialize(options)
+    @options = options
     @mapping ||= {}
-    json_data = JSON.parse(File.read(group_mapping_file))
-    parse(json_data)
+    if options.host_mapping_file
+      json_data = JSON.parse(File.read(@options.host_mapping_file))
+      parse(json_data["data"])
+    else
+      invalidate_cache("computers") if @options.force_cache_update
+      parse(with_cache("computers") {get})
+    end
     @computers = Hash.new()
+  end
+
+  def base_uri
+    URI('https://api.amp.cisco.com/v1/computers')
+  end
+
+  def base_params
+    {}
   end
 
   def hostname(guid)
@@ -35,10 +54,9 @@ class Computers
 
   private 
 
-  def parse(json)
-    json["data"].map do |computer|
+  def parse(json_data)
+    json_data.map do |computer|
       @mapping[computer["connector_guid"]] = computer["hostname"]
-      # @mapping[computer["connector_guid"]] = Computer.new(hostname: computer["hostname"], guid: computer["connector_guid"])
     end
     puts "parsed #{mapping.size} computers"
   end

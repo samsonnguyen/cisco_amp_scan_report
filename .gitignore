@@ -2,3 +2,4 @@
 *.json
 vendor/bundle
 .byebug_history
+cache

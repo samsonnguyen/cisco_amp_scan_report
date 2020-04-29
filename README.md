@@ -23,11 +23,11 @@ Parameters:
 | --- | --- |
 | --groups | A comma seperated list of group names (e.g "Audit, Protect") |
 | --start_time | ISO formatted time such as 2020-04-28 04:22 |
-| --group_mapping_file | path to json output from v1/groups api endpoint |
-| --host_mapping_file | path to json output from v1/computers api endpoint |
+| --group_mapping_file [optional] | path to json output from v1/groups api endpoint for faster processing |
+| --host_mapping_file [optional] | path to json output from v1/computers api endpoint for faster processing |
 | --api_key | api key |
 | --api_secret | api secret |
-
+| --force_cache_update | Force retrieval of group and host mappings from the api. This will use additional api calls |
 
 
 # Output
@@ -43,3 +43,12 @@ Csv file with the following columns:
 | scan_failed | Time reported of a scan failure |
 | detection_from_scan | If the agent reported that the scan caused a detection |
 | detections | These are detections within the dataset where timestamp > start_time (and group) passed into the script. **THESE MAY NOT CORRESPOND TO A DETECTION FROM A SCAN** |
+
+
+# Caching
+
+In order to avoid making too many calls to the API which will count towards the rate-limit imposed by AMP for Endpoints, the script will try and utilize a mapping file if provided with `--group_mapping_file` and `--host_mapping_file`. These should be simply the json output from `GET v1/groups` and `GET v1/computers` respectively.
+
+However, if the files are not provided manually. The script will attempt to retrieve results from the above api and cache them in the `cache` folder. This allows us to avoid making too many API calls on subsequent script runs (subsequent script runs will only need to retrieve from the `GET v1/events` endpoint).
+
+If hostnames are not being populated in the CSV, you can force a cache update with the `--force_cache_update` flag.

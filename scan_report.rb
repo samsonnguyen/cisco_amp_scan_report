@@ -10,8 +10,8 @@ require_relative 'lib/groups/groups'
 require_relative 'lib/events/events'
 
 class ScriptOptions
-  attr_accessor :groups, :group_mapping_file, :host_mapping_file, :api_key, :api_secret, :start_time
-  REQUIRED = %w(groups group_mapping_file host_mapping_file api_key api_secret start_time)
+  attr_accessor :groups, :group_mapping_file, :host_mapping_file, :api_key, :api_secret, :start_time, :force_cache_update
+  REQUIRED = %w(groups api_key api_secret start_time)
 
   def initialize(args)
     OptionParser.new do |opts|
@@ -40,7 +40,10 @@ class ScriptOptions
       opts.on("--start_time MANDATORY", :REQUIRED, DateTime) do |start_time|
         @start_time = start_time
       end
-      
+
+      opts.on("--force_cache_update") do
+        @force_cache_update = true
+      end      
     end.parse!(args)
     check_required_args
   end
@@ -62,11 +65,8 @@ class ScanReport
 
   def initialize
     @options = ScriptOptions.parse(ARGV)
-    @groups = Groups.new(options.group_mapping_file, options.groups)
-    @computers = Computers.new(options.host_mapping_file)
-    
-    # puts options.groups
-    # puts @groups.group_guids
+    @groups = Groups.new(options)
+    @computers = Computers.new(options)
 
     events = Events.new(@options, @groups).get
     events.each do |event|
