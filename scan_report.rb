@@ -4,10 +4,15 @@ require 'optparse'
 require 'optparse/date'
 require 'date'
 require 'csv'
+begin
+  require 'byebug'
+rescue LoadError
+end
 
 require_relative 'lib/computers/computers'
 require_relative 'lib/groups/groups'
 require_relative 'lib/events/events'
+require_relative 'lib/compromises/compromises'
 
 class ScriptOptions
   attr_accessor :groups, :group_mapping_file, :host_mapping_file, :api_key, :api_secret, :start_time, :force_cache_update
@@ -18,7 +23,7 @@ class ScriptOptions
       opts.banner = "Usage: clean_scans.rb [options] --help"
   
       opts.on("--groups 'group 1','group 2','group 3'", :REQUIRED, Array, "Comma delimited 'list' of group names") do |groups|
-        @groups = groups
+        @groups = groups.map(&:strip)
       end
 
       opts.on("--group_mapping_file MANDATORY", :REQUIRED) do |group_mapping_file|
@@ -61,31 +66,27 @@ class ScriptOptions
 end
 
 class ScanReport
-  attr_accessor :options, :groups, :computers
-
   def initialize
-    @options = ScriptOptions.parse(ARGV)
-    @groups = Groups.new(options)
-    @computers = Computers.new(options)
+    options = ScriptOptions.parse(ARGV)
+    groups = Groups.new(options)
+    computers = Computers.new(options)
+    compromises = Compromises.new(options)
+    
 
-    events = Events.new(@options, @groups).get
+    events = Events.new(options, groups).get
     events.each do |event|
-      @computers.process_event(event)
+      computers.process_event(event)
     end
+    computers.with_groupnames(groups).with_compromises(compromises)
     filename = "#{options.groups.to_s.gsub!(/[^0-9A-Za-z.\-]/, '_')}.csv"
     File.open(filename, "w", :write_headers => true) do |csv|
-      csv.write Computer.header_row.to_s
-      @computers.each do |computer|
+      csv.write Computer.header_row(compromises.enabled?).to_s
+      computers.each do |computer|
         csv.write computer.to_csv.to_s
       end
     end
     puts "file written to #{filename}"
   end
-
-  def get_events
-    
-  end
-
 end
 
 

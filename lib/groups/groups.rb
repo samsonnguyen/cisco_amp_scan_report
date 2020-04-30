@@ -26,6 +26,12 @@ class Groups
     mapping[name]
   end
 
+  def groupname(guid)
+    @reverse_mapping ||= @mapping.invert
+    @reverse_mapping[guid]
+  end
+
+
   def base_uri
     URI('https://api.amp.cisco.com/v1/groups')
   end

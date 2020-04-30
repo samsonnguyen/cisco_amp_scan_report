@@ -3,12 +3,16 @@ require 'csv'
 require 'time'
 
 class Computer
-  HEADER = %w(hostname guid scan_started scan_finished scan_failed detection_from_scan detections)
-  attr_accessor :scan_started, :scan_failed, :scan_finished, :detection_from_scan, :detections, :guid, :hostname
+  COLUMNS = [:hostname, :group_name, :guid, :scan_started, :scan_failed, :scan_finished, :detection_from_scan, :detections]
+  HEADER = COLUMNS.collect(&:to_s)
+  attr_accessor *COLUMNS, :compromises, :group_guid
 
-  def initialize
+  def initialize(computer_hash)
     @detection_from_scan = false
     @detections = []
+    @guid = computer_hash["connector_guid"]
+    @group_guid = computer_hash["group_guid"]
+    @hostname = computer_hash["hostname"]
   end
 
   def process_event(event)
@@ -32,19 +36,34 @@ class Computer
   end
 
   def to_csv
-    CSV::Row.new(HEADER, [
+    values = [
       hostname,
+      group_name,
       guid,
       (scan_started.nil? ? nil : Time.at(scan_started)),
       (scan_finished.nil? ? nil : Time.at(scan_finished)),
       (scan_failed.nil? ? nil : Time.at(scan_failed)),
       detection_from_scan,
-      detections.to_s])
+      detections.to_s]
+    if compromises
+      values << compromises[:unresolved]
+      values << compromises[:in_progress]
+    else
+      values << 0
+      values << 0
+    end
+    CSV::Row.new(Computer.header(!compromises.nil?), values)
   end
 
-  def self.header_row
-    CSV::Row.new(HEADER, HEADER, true)
+  def self.header_row(with_compromises = false)
+    CSV::Row.new(header(with_compromises), header(with_compromises), true)
   end
+
+  def self.header(with_compromises = false)
+    return HEADER + ["unresolved_compromises", "inprogress_compromises"] if with_compromises
+    HEADER
+  end
+  
 
 end
 

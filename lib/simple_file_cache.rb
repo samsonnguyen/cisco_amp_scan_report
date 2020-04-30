@@ -5,7 +5,7 @@ module SimpleFileCache
     "cache"
   end
 
-  def with_cache(key)
+  def with_cache(key = cache_key)
     ensure_cachedir
     if cached?(key)
       Marshal.load(File.binread(cache_path(key)))
@@ -16,11 +16,11 @@ module SimpleFileCache
     end
   end
 
-  def invalidate_cache(key)
+  def invalidate_cache(key = cache_key)
     FileUtils.rm(cache_path(key)) if cached?(key)
   end
 
-  def cached?(key)
+  def cached?(key = cache_key)
     File.exist? cache_path(key)
   end
 
@@ -28,7 +28,12 @@ module SimpleFileCache
     FileUtils.mkdir_p(cache_dir) unless File.exist? cache_dir
   end
 
-  def cache_path(key)
+  def cache_path(key = cache_key)
     File.join(cache_dir, key)
   end
+
+  def cache_key
+    self.class.to_s.downcase
+  end
+
 end

@@ -32,7 +32,11 @@ class Computers
   end
 
   def hostname(guid)
-    mapping[guid]
+    mapping[guid]["hostname"]
+  end
+
+  def group_guid(guid)
+    mapping[guid]["group_guid"]
   end
 
   def each
@@ -45,18 +49,31 @@ class Computers
 
   def process_event(event)
     guid = event["connector_guid"]
-    computer = @computers[guid] || Computer.new
-    computer.hostname = hostname(guid) if computer.hostname.nil?
-    computer.guid = guid if computer.guid.nil?
+    computer = @computers[guid] || Computer.new(@mapping[guid])
     computer.process_event(event)
     @computers[guid] = computer
+  end
+
+  def with_groupnames(groups)
+    @computers.each do |guid, computer|
+      computer.group_name = groups.groupname(computer.group_guid)
+    end
+    self
+  end
+
+  def with_compromises(compromises)
+    return self unless compromises.enabled?
+    @computers.each do |guid, computer|
+      computer.compromises = compromises.for_computer(computer.guid)
+    end
+    self
   end
 
   private 
 
   def parse(json_data)
     json_data.map do |computer|
-      @mapping[computer["connector_guid"]] = computer["hostname"]
+      @mapping[computer["connector_guid"]] = computer
     end
     puts "parsed #{mapping.size} computers"
   end
