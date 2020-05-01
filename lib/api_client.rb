@@ -1,11 +1,11 @@
 module ApiClient
   LIMIT = 500
-  def get
+  def get(additional_params = {})
     data = []
     last_result_index = 0
     total = 1
     while(last_result_index < total) do
-      batch = get_batch(offset: last_result_index)
+      batch = get_batch(offset: last_result_index, additional_params: additional_params)
       data.concat(batch["data"])
       total = batch["metadata"]["results"]["total"]
       index = batch["metadata"]["results"]["index"]
@@ -15,12 +15,13 @@ module ApiClient
     data
   end
   
-  def get_batch(offset: 0)
+  def get_batch(offset: 0, additional_params: {})
     uri = base_uri
     params = base_params.merge({
       :limit => LIMIT,
       :offset => offset
     })
+    params.merge!(additional_params)
     uri.query = URI.encode_www_form(params)
     
     res = make_request(uri)

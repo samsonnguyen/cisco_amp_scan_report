@@ -10,15 +10,18 @@ class Computers
   include SimpleFileCache
   attr_accessor :mapping, :computers
 
-  def initialize(options)
+  def initialize(options, groups)
     @options = options
     @mapping ||= {}
     if options.host_mapping_file
       json_data = JSON.parse(File.read(@options.host_mapping_file))
       parse(json_data["data"])
     else
-      invalidate_cache("computers") if @options.force_cache_update
-      parse(with_cache("computers") {get})
+      options.groups.each do |group_name|
+        group_guid = groups.guid(group_name)
+        invalidate_cache(cache_key_for_group(group_guid)) if @options.force_cache_update
+        parse(with_cache(cache_key_for_group(group_guid)) {get(additional_params([group_guid]))})
+      end
     end
     @computers = Hash.new()
   end
@@ -29,6 +32,10 @@ class Computers
 
   def base_params
     {}
+  end
+
+  def additional_params(group_guids)
+    { :"group_guid[]" => group_guids }
   end
 
   def hostname(guid)
@@ -49,7 +56,7 @@ class Computers
 
   def process_event(event)
     guid = event["connector_guid"]
-    computer = @computers[guid] || Computer.new(@mapping[guid])
+    computer = @computers[guid] || Computer.new(guid, @mapping[guid])
     computer.process_event(event)
     @computers[guid] = computer
   end
@@ -76,5 +83,9 @@ class Computers
       @mapping[computer["connector_guid"]] = computer
     end
     puts "parsed #{mapping.size} computers"
+  end
+
+  def cache_key_for_group(group_guid)
+    "#{cache_key}-#{group_guid}"
   end
 end

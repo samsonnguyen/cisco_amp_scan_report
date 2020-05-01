@@ -3,16 +3,18 @@ require 'csv'
 require 'time'
 
 class Computer
-  COLUMNS = [:hostname, :group_name, :guid, :scan_started, :scan_failed, :scan_finished, :detection_from_scan, :detections]
+  COLUMNS = [:hostname, :group_name, :guid, :scan_started, :scan_finished, :scan_failed, :detection_from_scan, :detections]
   HEADER = COLUMNS.collect(&:to_s)
   attr_accessor *COLUMNS, :compromises, :group_guid
 
-  def initialize(computer_hash)
+  def initialize(guid, computer_hash)
     @detection_from_scan = false
     @detections = []
-    @guid = computer_hash["connector_guid"]
-    @group_guid = computer_hash["group_guid"]
-    @hostname = computer_hash["hostname"]
+    @guid = guid
+    if !computer_hash.nil?
+      @group_guid = computer_hash["group_guid"]
+      @hostname = computer_hash["hostname"]
+    end
   end
 
   def process_event(event)

@@ -69,7 +69,7 @@ class ScanReport
   def initialize
     options = ScriptOptions.parse(ARGV)
     groups = Groups.new(options)
-    computers = Computers.new(options)
+    computers = Computers.new(options, groups)
     compromises = Compromises.new(options)
     
 
