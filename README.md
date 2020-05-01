@@ -43,6 +43,8 @@ Csv file with the following columns:
 | scan_failed | Time reported of a scan failure |
 | detection_from_scan | If the agent reported that the scan caused a detection |
 | detections | These are detections within the dataset where timestamp > start_time (and group) passed into the script. **THESE MAY NOT CORRESPOND TO A DETECTION FROM A SCAN** |
+| unresolved_compromises | the number of unresolved inbox items (compromises) from the AMP portal | 
+| inprogress_compromises | the number of inbox items (compromises) that are currently in progress from the AMP portal |
 
 
 # Caching
