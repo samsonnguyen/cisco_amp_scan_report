@@ -26,7 +26,7 @@ class Events
     {
       :start_date => @options.start_time.iso8601,
       :"event_type[]" => EVENT_TYPES.values,
-      :"group_guid[]" => @groups.group_guids
+      :"group_guid[]" => @groups.guids_including_descedants
     }
   end
 end

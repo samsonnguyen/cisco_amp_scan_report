@@ -31,7 +31,6 @@ class Compromises
 
   def parse(json_data)
     json_data.each do |compromise|
-      # debugger
       if STATUSES.include?(compromise["status"].to_sym)
         computer_guid = compromise["computer"]["connector_guid"]
         @mapping[computer_guid] = {unresolved: 0, in_progress: 0} if @mapping[computer_guid].nil?

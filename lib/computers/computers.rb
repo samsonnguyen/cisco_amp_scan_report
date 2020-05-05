@@ -18,11 +18,13 @@ class Computers
       parse(json_data["data"])
     else
       options.groups.each do |group_name|
-        group_guid = groups.guid(group_name)
-        invalidate_cache(cache_key_for_group(group_guid)) if @options.force_cache_update
-        parse(with_cache(cache_key_for_group(group_guid)) {get(additional_params([group_guid]))})
+        groups.get_group(group_name).guids_including_descedants.each do |group_guid|
+          invalidate_cache(cache_key_for_group(group_guid)) if @options.force_cache_update
+          parse(with_cache(cache_key_for_group(group_guid)) {get(additional_params([group_guid]))})
+        end
       end
     end
+    puts "parsed #{mapping.size} computers"
     @computers = Hash.new()
   end
 
@@ -82,7 +84,6 @@ class Computers
     json_data.map do |computer|
       @mapping[computer["connector_guid"]] = computer
     end
-    puts "parsed #{mapping.size} computers"
   end
 
   def cache_key_for_group(group_guid)
