@@ -49,6 +49,12 @@ class Groups
     end.flatten.compact
   end
 
+  def guids
+    @options.groups.map do |group_name|
+      guid(group_name)
+    end
+  end
+
   private
 
   def parse(json_data)
