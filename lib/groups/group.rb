@@ -15,7 +15,7 @@ class Group
         group = Group.new(group_data)
       end
       @children[group_data["guid"]] = group
-    elsif group_data["ancestry"] && group_data["ancestry"].any?
+    elsif group_data["ancestry"].any?
       ancestor_guid = group_data["ancestry"].last["guid"]
       ancestor = @children[ancestor_guid]
       ancestor ||= Group.new
