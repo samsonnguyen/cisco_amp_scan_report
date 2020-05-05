@@ -16,12 +16,10 @@ class Computers
     if options.host_mapping_file
       json_data = JSON.parse(File.read(@options.host_mapping_file))
       parse(json_data["data"])
-    else
-      options.groups.each do |group_name|
-        groups.get_group(group_name).guids_including_descedants.each do |group_guid|
-          invalidate_cache(cache_key_for_group(group_guid)) if @options.force_cache_update
-          parse(with_cache(cache_key_for_group(group_guid)) {get(additional_params([group_guid]))})
-        end
+    else    
+      groups.guids_including_descedants.each do |group_guid|
+        invalidate_cache(cache_key_for_group(group_guid)) if @options.force_cache_update
+        parse(with_cache(cache_key_for_group(group_guid)) {get(additional_params([group_guid]))})
       end
     end
     puts "parsed #{mapping.size} computers"
