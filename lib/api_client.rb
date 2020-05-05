@@ -25,7 +25,7 @@ module ApiClient
     uri.query = URI.encode_www_form(params)
     
     res = make_request(uri)
-    raise StandardError"The API returned a non 200 reponse\n#{res.body}" if res.code.to_i != 200
+    raise StandardError "The API returned a non 200 reponse\n#{res.body}" if res.code.to_i != 200
     JSON.parse(res.body)
   end
 
