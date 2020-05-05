@@ -1,7 +1,9 @@
 
 module ApiClient
   LIMIT = 500
+  PROGRESS_BATCH_COUNTER = 20
   def get(additional_params = {})
+    log_counter = 0
     data = []
     last_result_index = 0
     total = 1
@@ -12,6 +14,8 @@ module ApiClient
       index = batch["metadata"]["results"]["index"]
       current_item_count = batch["metadata"]["results"]["current_item_count"]
       last_result_index = index + current_item_count
+      log_counter+=1
+      puts " progress: #{last_result_index}/#{total}\n" if (log_counter % PROGRESS_BATCH_COUNTER)==0
     end
     data
   end
