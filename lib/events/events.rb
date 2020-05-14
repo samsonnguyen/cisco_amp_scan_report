@@ -14,7 +14,7 @@ class Events
   attr_accessor :events
 
   EXPORTABLE_DATA_MAP = [
-    :timestamp,
+    :date,
     :event_type,
     :severity,
     :connector_guid,
