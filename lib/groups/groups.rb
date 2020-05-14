@@ -12,7 +12,7 @@ class Groups
     @options = options
     @groups = Group.new # establish a nil group as root
     @mapping ||= {}
-    if @options.group_mapping_file
+    if @options.respond_to?(:group_mapping_file) && @options.group_mapping_file
       json_data = JSON.parse(File.read(@options.group_mapping_file))
       parse(json_data["data"])
     else
