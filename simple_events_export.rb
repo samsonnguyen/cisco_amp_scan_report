@@ -62,12 +62,13 @@ class SimpleEventsExport
   def initialize
     options = ScriptOptions.parse(ARGV)
     groups = Groups.new(options)
-    events = Events.new(options, groups).get
+    events = Events.new(options, groups)
+    events_data = events.get
     filename = "events_csv_#{options.groups.to_s.gsub!(/[^0-9A-Za-z.\-]/, '_')}.csv"
     File.open(filename, "w", :write_headers => true) do |csv|
-      csv.write Events.header_row.to_s
-      events.each do |event|
-        csv.write Events.to_csv(event).to_s
+      csv.write events.header_row.to_s
+      events_data.each do |event|
+        csv.write events.to_csv(event).to_s
       end
     end
     puts "file written to #{filename}"

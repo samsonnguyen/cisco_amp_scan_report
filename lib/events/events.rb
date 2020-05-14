@@ -18,6 +18,7 @@ class Events
     :event_type,
     :severity,
     :connector_guid,
+    :group_names,
     {computer: [
       :hostname,
       :external_ip
@@ -80,22 +81,22 @@ class Events
   def base_params
     {
       :start_date => @options.start_time.iso8601,
-      :"event_type[]" => @options.event_type_ids || EVENT_TYPES.values,
+      :"event_type[]" => @options.respond_to?(:event_type_ids) ? @options.event_type_ids : EVENT_TYPES.values,
       :"group_guid[]" => @groups.guids
     }
   end
 
-  def self.to_csv(event)
-    CSV::Row.new(header_row, append_to_row([], event, EXPORTABLE_DATA_MAP))
+  def to_csv(event)
+    CSV::Row.new(header_row, append_to_row([], decorate(event), EXPORTABLE_DATA_MAP))
   end
 
-  def self.header_row
+  def header_row
     @@header_row ||= CSV::Row.new(flatten_header(EXPORTABLE_DATA_MAP), flatten_header(EXPORTABLE_DATA_MAP), true)
   end
 
   private 
   
-  def self.flatten_header(headers, prefix = nil)
+  def flatten_header(headers, prefix = nil)
     flattened_headers = []
     headers.each do |item|
       if item.is_a? Hash
@@ -116,7 +117,7 @@ class Events
     flattened_headers.flatten
   end
 
-  def self.append_to_row(row, data, mappings)
+  def append_to_row(row, data, mappings)
     mappings.each do |mapping|
       if mapping.is_a? Hash
         mapping.each do |key, values|
@@ -135,7 +136,17 @@ class Events
     row
   end
 
-  def self.count_nested_values(mapping)
+  def decorate(event)
+    group_guids = event["group_guids"]
+    if group_guids
+      group_names = group_guids.map { |guid| @groups.groupname(guid) }
+      event["group_names"] = group_names.join(', ')
+    end
+    event
+  end
+
+
+  def count_nested_values(mapping)
     return 1 if mapping.is_a? Symbol
     return mapping.count if mapping.all? { |element| element.is_a? Symbol }
     mapping.inject(0) { |sum, element| sum + count_nested_values(element) }
